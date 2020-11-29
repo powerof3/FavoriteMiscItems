@@ -1,3 +1,3 @@
-# ExamplePlugin-CommonLibSSE
+# FavoriteMiscItems
 
-Basic plugin template for use with CommonLibSSE
+SKSE plugin that allows you to favorite books, keys, soulgems and other misc items. Requires CommonlibSSE to build.

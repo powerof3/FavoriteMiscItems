@@ -29,5 +29,6 @@
     <ClInclude Include="include\version.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
 </Project>

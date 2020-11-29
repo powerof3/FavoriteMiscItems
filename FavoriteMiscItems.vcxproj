@@ -240,6 +240,7 @@
   <ItemGroup>
     <ClInclude Include="include\PCH.h" />
     <ClInclude Include="include\version.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibSSE\CommonLibSSE.vcxproj">

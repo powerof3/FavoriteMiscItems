@@ -186,11 +186,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 
-	SKSE::AllocTrampoline(28);
+	SKSE::AllocTrampoline(14);
 
 	FavoriteMiscItem::Install();
 	FavoriteBook::Install();
-	DebugBook::Install();
+	//DebugBook::Install();
 
 	return true;
 }

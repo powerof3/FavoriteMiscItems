@@ -1,0 +1,14 @@
+{
+  "name": "favorite-misc-items",
+  "version-string": "3.5.0",
+  "description": "Favorite Misc Items",
+  "homepage": "",
+  "license": "MIT",
+  "dependencies": [
+    "boost-stl-interfaces",
+    "rsm-binary-io",
+    "simpleini",
+    "spdlog",
+    "xbyak"
+  ]
+}

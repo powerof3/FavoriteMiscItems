@@ -21,8 +21,8 @@ SKSE plugin that allows you to favorite books, keys, soulgems and other misc ite
 
 ## Building
 ```
-git clone https://github.com/powerof3/Favorite-Misc-Items.git
-cd Favorite-Misc-Items
+git clone https://github.com/powerof3/FavoriteMiscItems.git
+cd FavoriteMiscItems
 cmake -B build -S .
 ```
 ## License

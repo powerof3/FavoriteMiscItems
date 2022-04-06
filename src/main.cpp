@@ -63,6 +63,12 @@ namespace FavoriteBook
 		static void read_book(RE::TESObjectBOOK* a_book)
 		{
 			const auto player = RE::PlayerCharacter::GetSingleton();
+			const auto UI = RE::UI::GetSingleton();
+
+			if (!player || !UI || !UI->IsMenuOpen(RE::FavoritesMenu::MENU_NAME)) {
+				return;
+			}
+
 		    if (a_book->TeachesSpell()) {
 				if (process_book(a_book, player)) {
 					player->RemoveItem(a_book, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
@@ -71,10 +77,8 @@ namespace FavoriteBook
 				RE::BSString str;
 				a_book->GetDescription(str, nullptr);
 				if (!str.empty()) {
-					auto UI = RE::UIMessageQueue::GetSingleton();
-					auto intfcStr = RE::InterfaceStrings::GetSingleton();
-					if (UI && intfcStr) {
-						UI->AddMessage(intfcStr->favoritesMenu, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+                    if (const auto UIMsgQueue = RE::UIMessageQueue::GetSingleton()) {
+						UIMsgQueue->AddMessage(RE::FavoritesMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
 					}
 					RE::NiPoint3 pos{};
 					RE::NiMatrix3 rot{};

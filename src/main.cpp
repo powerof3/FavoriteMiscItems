@@ -38,7 +38,7 @@ namespace FavoriteMiscItem
 		REL::Relocation<std::uintptr_t> func{ RELOCATION_ID(50944, 51821) };
 		stl::asm_replace<CanBeFavorited>(func.address());
 
-		logger::info("patching favorite function");
+		logger::info("patching FavoritesManager::CanBeFavorited");
 	}
 }
 
@@ -46,68 +46,59 @@ namespace FavoriteBook
 {
 	struct detail
 	{
-		static bool process_book(RE::TESObjectBOOK* a_book, RE::TESObjectREFR* a_reader)
+		static bool read_book(RE::TESObjectBOOK* a_book, RE::TESObjectREFR* a_reader)
 		{
-			using func_t = decltype(&process_book);
+			using func_t = decltype(&read_book);
 			REL::Relocation<func_t> func{ RELOCATION_ID(17439, 17842) };
 			return func(a_book, a_reader);
 		}
 
-		static void display_book_menu(RE::BSString* a_description, RE::ExtraDataList* a_list, RE::TESObjectREFR* a_ref, RE::TESObjectBOOK* a_book, const RE::NiPoint3& a_pos, const RE::NiMatrix3& a_rot, float a_scale, bool a_defaultPos)
+		static void open_book_menu(const RE::BSString& a_description, const RE::ExtraDataList* a_extraList, RE::TESObjectREFR* a_ref, RE::TESObjectBOOK* a_book, const RE::NiPoint3& a_pos, const RE::NiMatrix3& a_rot, float a_scale, bool a_defaultPos)
 		{
-			using func_t = decltype(&display_book_menu);
+			using func_t = decltype(&open_book_menu);
 			REL::Relocation<func_t> func{ RELOCATION_ID(50122, 51053) };
-			return func(a_description, a_list, a_ref, a_book, a_pos, a_rot, a_scale, a_defaultPos);
-		}
-
-		static void read_book(RE::TESObjectBOOK* a_book)
-		{
-			const auto player = RE::PlayerCharacter::GetSingleton();
-			const auto UI = RE::UI::GetSingleton();
-
-			if (!player || !UI || !UI->IsMenuOpen(RE::FavoritesMenu::MENU_NAME)) {
-				return;
-			}
-
-		    if (a_book->TeachesSpell()) {
-				if (process_book(a_book, player)) {
-					player->RemoveItem(a_book, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
-				}
-			} else {
-				RE::BSString str;
-				a_book->GetDescription(str, nullptr);
-				if (!str.empty()) {
-                    if (const auto UIMsgQueue = RE::UIMessageQueue::GetSingleton()) {
-						UIMsgQueue->AddMessage(RE::FavoritesMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
-					}
-					RE::NiPoint3 pos{};
-					RE::NiMatrix3 rot{};
-					rot.SetEulerAnglesXYZ(-0.05f, -0.05f, 1.50f);
-					display_book_menu(&str, &player->extraList, nullptr, a_book, pos, rot, 1.0f, true);
-				}
-			}
+			return func(a_description, a_extraList, a_ref, a_book, a_pos, a_rot, a_scale, a_defaultPos);
 		}
 	};
 
-	struct GetIsWorn
+	struct ToggleEquipItem
 	{
-		static RE::ExtraDataList* thunk(RE::InventoryEntryData* a_entryData, bool a_unk01)
+		static void thunk(RE::ActorEquipManager* a_equipMgr, RE::Actor* a_actor, RE::InventoryEntryData* a_entryData, RE::BGSEquipSlot* a_equipSlot, bool a_unk05)
 		{
-            const auto object = a_entryData->object;
-            if (const auto book = object ? object->As<RE::TESObjectBOOK>() : nullptr) {
-				detail::read_book(book);
+			func(a_equipMgr, a_actor, a_entryData, a_equipSlot, a_unk05);
+
+			const auto object = a_entryData->object;
+			if (const auto book = object ? object->As<RE::TESObjectBOOK>() : nullptr) {
+				if (book->TeachesSpell()) {
+					if (const auto player = RE::PlayerCharacter::GetSingleton(); detail::read_book(book, player)) {
+						player->RemoveItem(book, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+					}
+					return;
+				}
+			    RE::BSString str;
+				book->GetDescription(str, nullptr);
+				if (const auto UIMsgQueue = RE::UIMessageQueue::GetSingleton(); !str.empty()) {
+					UIMsgQueue->AddMessage(RE::FavoritesMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+
+				    const RE::ExtraDataList* list = a_entryData->extraLists ? a_entryData->extraLists->front() : nullptr;
+
+				    RE::NiMatrix3 rot{};
+					rot.SetEulerAnglesXYZ(-0.05f, -0.05f, 1.50f);
+
+				    detail::open_book_menu(str, list, nullptr, book, RE::NiPoint3(), rot, 1.0f, true);
+				}
+				str.clear();
 			}
-			return func(a_entryData, a_unk01);
 		}
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
 
 	void Install()
 	{
-		REL::Relocation<std::uintptr_t> func{ RELOCATION_ID(37951, 38907), 0x2D };
-		stl::write_thunk_call<GetIsWorn>(func.address());
+		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(50654, 51548), OFFSET(0xC4, 0xC2) };  //FavoritesMenu::UseQuickslotItem
+		stl::write_thunk_call<ToggleEquipItem>(target.address());
 
-		logger::info("patching favorite equip function");
+		logger::info("patching FavoritesMenu::UseQuickslotItem");
 	}
 }
 

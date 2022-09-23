@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(NAME "po3_FavoriteMiscItems")
-set(VERSION 3.6.0)
+set(VERSION 3.7.0)
 set(AE_VERSION 1)
 
 # ---- Options ----

@@ -1,6 +1,6 @@
 {
   "name": "favorite-misc-items",
-  "version-string": "3.6",
+  "version-string": "3.7",
   "description": "Favorite Misc Items",
   "homepage": "",
   "license": "MIT",
@@ -10,12 +10,5 @@
     "simpleini",
     "spdlog",
     "xbyak"
-  ],
-  "builtin-baseline": "c06dfc0ac2649834da8b9f3092b907fb037accab",
-  "overrides": [
-    {
-      "name": "fmt",
-      "version": "8.0.1"
-    }
   ]
 }

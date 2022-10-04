@@ -1,4 +1,5 @@
 set(sources ${sources}
-	src/main.cpp
+	src/Hooks.cpp
 	src/PCH.cpp
+	src/main.cpp
 )

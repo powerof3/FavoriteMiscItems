@@ -44,7 +44,7 @@ namespace FavoriteMiscItems
 	}
 }
 
-namespace FavoriteBook
+namespace FavoriteBooks
 {
 	struct detail
 	{

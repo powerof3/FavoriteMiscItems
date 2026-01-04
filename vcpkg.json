@@ -1,13 +1,14 @@
 {
   "name": "favorite-misc-items",
-  "version-string": "3.7.1",
+  "version-string": "4.0.0",
   "description": "Favorite Misc Items",
   "homepage": "",
   "license": "MIT",
   "dependencies": [
-    "boost-stl-interfaces",
+    "clib-util",
     "rsm-binary-io",
     "spdlog",
     "xbyak"
-  ]
+  ],
+  "builtin-baseline": "14bb451131ccf6be50a63a8d9dfe7980e46b5958"
 }

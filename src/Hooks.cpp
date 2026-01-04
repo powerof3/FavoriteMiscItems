@@ -32,12 +32,24 @@ namespace FavoriteMiscItems
 			}
 			return result;
 		}
-		static inline constexpr std::size_t size = 0x6F;
+
+		static inline constexpr std::size_t size =
+#ifndef SKYRIMVR
+			0x6F;
+#else
+			0x60;
+#endif
 	};
 
 	void Install()
 	{
-		REL::Relocation<std::uintptr_t> func{ RELOCATION_ID(50944, 51821) };
+		REL::Relocation<std::uintptr_t> func{
+#ifndef SKYRIMVR
+			RELOCATION_ID(50944, 51821)
+#else
+			REL::Offset(0x08B8EF0)
+#endif
+		};
 		stl::asm_replace<CanBeFavorited>(func.address());
 
 		logger::info("patching FavoritesManager::CanBeFavorited");
@@ -46,22 +58,17 @@ namespace FavoriteMiscItems
 
 namespace FavoriteBooks
 {
+#ifdef SKYRIMVR
 	struct detail
 	{
-		static bool read_book(RE::TESObjectBOOK* a_book, RE::TESObjectREFR* a_reader)
-		{
-			using func_t = decltype(&read_book);
-			REL::Relocation<func_t> func{ RELOCATION_ID(17439, 17842) };
-			return func(a_book, a_reader);
-		}
-
-		static void open_book_menu(const RE::BSString& a_description, const RE::ExtraDataList* a_extraList, RE::TESObjectREFR* a_ref, RE::TESObjectBOOK* a_book, const RE::NiPoint3& a_pos, const RE::NiMatrix3& a_rot, float a_scale, bool a_defaultPos)
+		static void open_book_menu(const RE::BSString& a_description, const RE::ExtraDataList* a_extraList, RE::TESObjectREFR* a_ref, RE::TESObjectBOOK* a_book, const RE::NiPoint3& a_pos, const RE::NiMatrix3& a_rot, float a_scale, bool a_defaultPos, RE::NiAVObject* a_ref3D)
 		{
 			using func_t = decltype(&open_book_menu);
-			REL::Relocation<func_t> func{ RELOCATION_ID(50122, 51053) };
-			return func(a_description, a_extraList, a_ref, a_book, a_pos, a_rot, a_scale, a_defaultPos);
+			static REL::Relocation<func_t> func{ RELOCATION_ID(50122, 51053) };
+			return func(a_description, a_extraList, a_ref, a_book, a_pos, a_rot, a_scale, a_defaultPos, a_ref3D);
 		}
 	};
+#endif
 
 	struct ToggleEquipItem
 	{
@@ -72,14 +79,12 @@ namespace FavoriteBooks
 			const auto object = a_entryData->object;
 			if (const auto book = object ? object->As<RE::TESObjectBOOK>() : nullptr) {
 				if (book->TeachesSpell()) {
-					if (const auto player = RE::PlayerCharacter::GetSingleton(); detail::read_book(book, player)) {
-						player->RemoveItem(book, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+					if (a_actor && book->Read(a_actor)) {
+						a_actor->RemoveItem(book, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
 					}
 					return;
 				}
-				RE::BSString str;
-				book->GetDescription(str, nullptr);
-				if (const auto UIMsgQueue = RE::UIMessageQueue::GetSingleton(); !str.empty()) {
+				if (const auto UIMsgQueue = RE::UIMessageQueue::GetSingleton()) {
 					UIMsgQueue->AddMessage(RE::FavoritesMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
 
 					const RE::ExtraDataList* list = a_entryData->extraLists ? a_entryData->extraLists->front() : nullptr;
@@ -87,17 +92,33 @@ namespace FavoriteBooks
 					RE::NiMatrix3 rot{};
 					rot.SetEulerAnglesXYZ(-0.05f, -0.05f, 1.50f);
 
-					detail::open_book_menu(str, list, nullptr, book, RE::NiPoint3(), rot, 1.0f, true);
+#ifndef SKYRIMVR
+					RE::BookMenu::OpenMenuFromBaseForm(book, list, RE::NiPoint3(), rot, 1.0f, true);
+#else
+					RE::BSString str;
+					book->GetDescription(str, nullptr);
+					if (!str.empty()) {
+						detail::open_book_menu(str, list, nullptr, book, RE::NiPoint3(), rot, 1.0f, true, a_actor->Get3D2());
+					}
+					str.clear();
+#endif
 				}
-				str.clear();
 			}
 		}
+
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
 
 	void Install()
 	{
-		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(50654, 51548), OFFSET(0xC4, 0xC2) };  //FavoritesMenu::UseQuickslotItem
+		REL::Relocation<std::uintptr_t> target{
+#ifndef SKYRIMVR
+			RELOCATION_ID(50654, 51548), OFFSET(0xC4, 0xC2)
+#else
+			REL::Offset(0x08A5110 + 0xC4),
+#endif
+		};  //FavoritesMenu::UseQuickslotItem
+
 		stl::write_thunk_call<ToggleEquipItem>(target.address());
 
 		logger::info("patching FavoritesMenu::UseQuickslotItem");

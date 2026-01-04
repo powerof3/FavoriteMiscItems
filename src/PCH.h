@@ -6,10 +6,12 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <xbyak/xbyak.h>
 
+#include "ClibUtil/string.hpp"
+
 #define DLLEXPORT __declspec(dllexport)
 
 namespace logger = SKSE::log;
-namespace string = SKSE::stl::string;
+namespace string = clib_util::string;
 
 using namespace std::literals;
 
